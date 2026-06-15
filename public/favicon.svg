@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#0b1023"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#eafcff" stroke-width="2.5"/>
+  <!-- cup -->
+  <path d="M20 30 h18 v6 a9 9 0 0 1 -9 9 h0 a9 9 0 0 1 -9 -9 z" fill="none" stroke="#eafcff" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M38 32 h4 a4 4 0 0 1 0 8 h-2" fill="none" stroke="#eafcff" stroke-width="2.5"/>
+  <line x1="18" y1="49" x2="40" y2="49" stroke="#eafcff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- leaf -->
+  <path d="M40 16 c6 1 8 7 4 12 c-6 -1 -8 -7 -4 -12 z" fill="#46d36b"/>
+  <text x="32" y="29" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#eafcff" text-anchor="middle">CCR</text>
+</svg>
