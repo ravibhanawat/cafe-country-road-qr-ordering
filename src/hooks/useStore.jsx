@@ -1,36 +1,28 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
+import { createContext, useContext, useEffect, useMemo, useReducer, useState } from 'react'
+import { verifyTableFromURL } from '../lib/tableToken'
 
 /* ------------------------------------------------------------------
-   Global store: handles the locked table number + cart + order state.
-   The table number is read ONCE from the URL (?table=NN) and then
-   locked for the whole session. A guest can ONLY order for their own
-   table - they cannot change it from inside the app.
+   Global store: handles the SIGNED table token + cart + order state.
+
+   The table number now comes from a signed QR token (?t=N&k=signature).
+   On load we verify the signature; a guest who edits the table number
+   in the URL gets status 'tampered' and is blocked from ordering.
 ------------------------------------------------------------------ */
 
 const StoreContext = createContext(null)
 
-function readTableFromURL() {
-  const params = new URLSearchParams(window.location.search)
-  let t = params.get('table') || params.get('t')
-  if (!t) {
-    // also support hash style #table=5
-    const h = new URLSearchParams(window.location.hash.replace('#', ''))
-    t = h.get('table')
-  }
-  if (!t) return null
-  const n = parseInt(String(t).replace(/[^0-9]/g, ''), 10)
-  return Number.isFinite(n) && n > 0 ? n : null
-}
-
 const initialState = {
-  table: readTableFromURL(),   // null => no valid table => blocked
-  cart: {},                    // { itemId: { item, qty } }
-  order: null,                 // placed order object
+  table: null,
+  tableStatus: 'verifying', // 'verifying' | 'ok' | 'tampered' | 'none'
+  cart: {},
+  order: null,
   paid: false
 }
 
 function reducer(state, action) {
   switch (action.type) {
+    case 'SET_TABLE':
+      return { ...state, table: action.table, tableStatus: action.status }
     case 'ADD': {
       const ex = state.cart[action.item.id]
       const qty = (ex?.qty || 0) + 1
@@ -66,6 +58,17 @@ function reducer(state, action) {
 export function StoreProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  // Verify the signed table token from the URL once on mount.
+  useEffect(() => {
+    let cancelled = false
+    verifyTableFromURL().then(({ table, status }) => {
+      if (!cancelled) dispatch({ type: 'SET_TABLE', table: status === 'ok' ? table : null, status })
+    }).catch(() => {
+      if (!cancelled) dispatch({ type: 'SET_TABLE', table: null, status: 'tampered' })
+    })
+    return () => { cancelled = true }
+  }, [])
+
   // persist cart per table so a refresh keeps the order
   useEffect(() => {
     if (!state.table) return
@@ -88,6 +91,8 @@ export function StoreProvider({ children }) {
     clear: () => dispatch({ type: 'CLEAR' }),
     qtyOf: (id) => state.cart[id]?.qty || 0,
     placeOrder: () => {
+      // Guard: never place an order for an unverified table.
+      if (state.tableStatus !== 'ok' || !state.table) return null
       const order = {
         id: 'CCR' + Date.now().toString().slice(-6),
         table: state.table,
