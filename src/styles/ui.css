@@ -1,0 +1,151 @@
+/* =========================================================
+   Cafe Country Road - UI component styles
+   (menu, cart, payment, games) - paired with global.css
+   ========================================================= */
+
+/* ---- search ---- */
+.search-wrap { position: sticky; top: 0; z-index: 10; padding: 10px 0; }
+.search {
+  width: 100%; padding: 14px 16px; border-radius: 14px;
+  background: rgba(11,16,35,.85); border: 1px solid var(--card-border);
+  color: var(--text); font-family: inherit; font-size: 15px; outline: none;
+  backdrop-filter: blur(8px); transition: border-color .2s, box-shadow .2s;
+}
+.search::placeholder { color: var(--muted); }
+.search:focus { border-color: rgba(255,179,71,.6); box-shadow: var(--glow-amber); }
+
+/* ---- categories ---- */
+.cat-list { display: flex; flex-direction: column; gap: 12px; }
+.cat { overflow: hidden; }
+.cat-head {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 16px; background: transparent; border: none; cursor: pointer;
+  color: var(--text); font-family: inherit; font-size: 16px; text-align: left;
+}
+.cat-ic {
+  font-size: 22px; width: 44px; height: 44px; border-radius: 12px; flex: none;
+  display: grid; place-items: center; background: rgba(255,179,71,.10);
+  border: 1px solid rgba(255,179,71,.25);
+}
+.cat-name { font-weight: 600; flex: 1; }
+.cat-meta { color: var(--muted); font-size: 12px; }
+.chev { color: var(--amber); transition: transform .25s; }
+.chev.up { transform: rotate(180deg); }
+.cat-items { padding: 0 16px 12px; animation: drop .28s ease both; }
+@keyframes drop { from { opacity: 0; transform: translateY(-6px);} to { opacity: 1; transform: none;} }
+
+.item-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-top: 1px dashed rgba(255,255,255,.08);
+}
+.item-info { flex: 1; display: flex; flex-direction: column; }
+.item-name { font-weight: 500; }
+.item-price { color: var(--amber-bright); font-size: 13px; }
+.add-btn { padding: 8px 16px; border-radius: 12px; font-size: 14px; }
+
+.stepper {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: rgba(255,179,71,.12); border: 1px solid rgba(255,179,71,.4);
+  border-radius: 12px; padding: 6px 12px;
+}
+.stepper button {
+  background: transparent; border: none; color: var(--amber-bright);
+  font-size: 18px; font-weight: 700; cursor: pointer; line-height: 1;
+}
+.stepper span { min-width: 14px; text-align: center; font-weight: 600; }
+
+/* ---- floating cta ---- */
+.floating-cta {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: 86px; z-index: 25; width: calc(100% - 32px); max-width: 420px;
+  animation: ctaPop .3s ease both;
+}
+@keyframes ctaPop { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+/* ---- cart ---- */
+.cart-line {
+  display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px;
+  padding: 12px; border-bottom: 1px dashed rgba(255,255,255,.08);
+}
+.cart-line:last-child { border-bottom: none; }
+.line-total { font-weight: 600; min-width: 56px; text-align: right; }
+.bill { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.bill .total { font-size: 18px; margin-top: 2px; }
+
+/* ---- payment ---- */
+.pay-card { padding: 22px; max-width: 320px; margin: 0 auto; }
+.gpay-row { font-weight: 600; margin-bottom: 14px; color: var(--text); }
+.gpay-row .g {
+  display: inline-grid; place-items: center; width: 22px; height: 22px;
+  border-radius: 50%; background: #fff; color: #4285F4; font-weight: 800;
+  margin-right: 6px; font-size: 13px; vertical-align: middle;
+}
+.qr-frame {
+  background: #fff; padding: 10px; border-radius: 16px; display: inline-block;
+  box-shadow: 0 0 26px rgba(234,252,255,.25);
+}
+.qr-frame svg { display: block; border-radius: 8px; }
+.qr-fallback { background: #fff; color: #111; padding: 16px; border-radius: 12px; }
+
+.check-burst { font-size: 64px; animation: burst .6s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes burst { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.eta {
+  font-size: 40px; font-weight: 700; letter-spacing: 2px; color: var(--amber-bright);
+  text-shadow: var(--glow-amber); margin: 6px 0;
+}
+
+/* ---- games ---- */
+.game-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.game-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: 20px; text-align: left; cursor: pointer; color: var(--text);
+  transition: transform .15s, box-shadow .2s, border-color .2s;
+}
+.game-card:hover { transform: translateY(-3px); border-color: rgba(255,179,71,.5); box-shadow: var(--glow-amber); }
+.game-card strong { font-size: 17px; }
+.game-card .muted { font-size: 13px; }
+.game-ic { font-size: 32px; }
+
+.game-board { padding: 22px; max-width: 420px; margin: 0 auto; }
+
+/* tic tac toe */
+.ttt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 280px; margin: 0 auto; }
+.ttt-cell {
+  aspect-ratio: 1; border-radius: 14px; font-size: 30px; cursor: pointer;
+  background: rgba(255,255,255,.05); border: 1px solid var(--card-border); color: var(--text);
+  display: grid; place-items: center; transition: background .15s, transform .1s;
+}
+.ttt-cell:hover { background: rgba(255,179,71,.12); }
+.ttt-cell:active { transform: scale(.94); }
+
+/* memory */
+.memory { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 320px; margin: 0 auto; }
+.mem-card {
+  aspect-ratio: 1; border-radius: 12px; font-size: 26px; cursor: pointer;
+  background: linear-gradient(135deg, rgba(255,179,71,.18), rgba(70,211,107,.12));
+  border: 1px solid var(--card-border); color: var(--text);
+  display: grid; place-items: center; transition: transform .2s;
+}
+.mem-card.open { background: rgba(255,255,255,.08); transform: rotateY(0); }
+.mem-card:active { transform: scale(.95); }
+
+/* catch the beans */
+.catch-area {
+  position: relative; height: 320px; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(11,16,35,.4), rgba(27,37,80,.5));
+  border: 1px solid var(--card-border);
+}
+.bean {
+  position: absolute; transform: translate(-50%, -50%); font-size: 28px;
+  background: none; border: none; cursor: pointer; transition: top .09s linear;
+}
+.catch-start { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+
+/* ---- responsive ---- */
+@media (min-width: 560px) {
+  .game-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 360px) {
+  .brand-title { font-size: 22px; }
+  .memory { gap: 6px; }
+}
