@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CCR - Table QR Generator (staff)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background:#0b1023; color:#f4f6ff; margin:0; padding:24px; }
+    .card { max-width:520px; margin:0 auto; background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:24px; }
+    h1 { font-size:20px; margin:0 0 4px; }
+    p.muted { color:#9aa3c7; font-size:13px; margin-top:4px; }
+    label { display:block; font-size:13px; color:#9aa3c7; margin:16px 0 6px; }
+    input { width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.15);
+      background:#121a3a; color:#fff; font-size:15px; box-sizing:border-box; }
+    button { margin-top:16px; padding:12px 18px; border:none; border-radius:12px; cursor:pointer;
+      font-weight:600; background:linear-gradient(180deg,#ffd27a,#ffb347); color:#2a1700; }
+    .out { margin-top:20px; text-align:center; }
+    .out a { color:#ffd27a; word-break:break-all; font-size:13px; }
+    #qr { background:#fff; padding:12px; border-radius:12px; display:inline-block; margin-top:12px; }
+    .warn { margin-top:18px; font-size:12px; color:#ffb347; }
+    .range { display:flex; gap:8px; }
+    .range input { width:50%; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Cafe Country Road - Table QR generator</h1>
+    <p class="muted">Staff tool. Generates a <b>signed</b> ordering link for a table so the
+      table number can't be edited in the URL. Keep the secret in sync with
+      <code>src/lib/tableToken.js</code>.</p>
+
+    <label>Site base URL (where the app is hosted)</label>
+    <input id="base" placeholder="https://your-domain.com/" />
+
+    <label>Table number</label>
+    <input id="table" type="number" min="1" value="1" />
+
+    <button id="gen">Generate signed QR</button>
+
+    <div class="out" id="out"></div>
+
+    <p class="warn">Note: the signature secret ships in the front-end, so this stops casual
+      URL editing but is not a full security boundary. For real tamper-proofing, verify the
+      token on a server before accepting an order.</p>
+  </div>
+
+  <!-- QR rendering via the same library used by the app -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    // MUST match SECRET in src/lib/tableToken.js
+    const SECRET = 'CCR_ccr-2024_changeme_secret';
+    const enc = new TextEncoder();
+
+    async function hmac(message) {
+      const key = await crypto.subtle.importKey('raw', enc.encode(SECRET),
+        { name:'HMAC', hash:'SHA-256' }, false, ['sign']);
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+      const bytes = new Uint8Array(sig); let bin = '';
+      for (const b of bytes) bin += String.fromCharCode(b);
+      return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'').slice(0,16);
+    }
+
+    document.getElementById('gen').addEventListener('click', async () => {
+      const base = (document.getElementById('base').value || (location.origin + '/')).trim();
+      const table = parseInt(document.getElementById('table').value, 10);
+      const out = document.getElementById('out');
+      if (!Number.isFinite(table) || table <= 0) { out.textContent = 'Enter a valid table number'; return; }
+      const k = await hmac('table:' + table);
+      const sep = base.includes('?') ? '&' : '?';
+      const url = base + sep + 't=' + table + '&k=' + k;
+      out.innerHTML = '<div><b>Table ' + table + '</b></div>' +
+        '<canvas id="qr"></canvas><div style="margin-top:8px"><a href="' + url + '">' + url + '</a></div>';
+      window.QRCode.toCanvas(document.getElementById('qr'), url, { width: 240, margin: 2 });
+    });
+  </script>
+</body>
+</html>
