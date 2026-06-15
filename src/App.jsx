@@ -6,9 +6,9 @@ import Games from './games/Games.jsx'
 
 /* ============================================================
    Cafe Country Road - QR Table Ordering
-   Flow: scan QR (?table=N) -> Menu -> Cart -> Pay (UPI QR) ->
-   Order placed -> Games while you wait.
-   A guest is locked to their own table only.
+   Flow: scan signed QR (?t=N&k=sig) -> Menu -> Cart -> Pay (UPI QR)
+   -> Order placed -> Games while you wait.
+   A guest is locked to their own table; a tampered URL is blocked.
    ============================================================ */
 
 export default function App() {
@@ -30,8 +30,10 @@ function Shell() {
   const store = useStore()
   const [tab, setTab] = useState('menu')
 
-  // No valid table in the URL => block ordering (anti table-spoofing).
-  if (!store.table) return <NoTable />
+  // Table comes from a SIGNED token. Block anything that isn't verified.
+  if (store.tableStatus === 'verifying') return <Verifying />
+  if (store.tableStatus === 'tampered') return <BlockedScreen tampered />
+  if (store.tableStatus !== 'ok' || !store.table) return <BlockedScreen />
 
   return (
     <div className="app">
@@ -65,7 +67,18 @@ function Header() {
   )
 }
 
-function NoTable() {
+function Verifying() {
+  return (
+    <div className="app">
+      <div className="container center" style={{ paddingTop: 120 }}>
+        <div className="brand-badge" style={{ margin: '0 auto' }}>\u2615</div>
+        <p className="muted mt-3">Verifying your table\u2026</p>
+      </div>
+    </div>
+  )
+}
+
+function BlockedScreen({ tampered }) {
   return (
     <div className="app">
       <div className="container center" style={{ paddingTop: 90 }}>
@@ -74,20 +87,29 @@ function NoTable() {
           <div className="brand-title">Cafe Country Road<small>ALWAYS FRESH</small></div>
         </div>
         <div className="card mt-4" style={{ padding: 28, maxWidth: 460, margin: '32px auto' }}>
-          <h2 className="amber-text">Scan your table QR \uD83D\uDCF1</h2>
-          <p className="muted mt-2">
-            To place an order, please scan the QR code on your table. It opens this
-            page with your table number so your order reaches the right table.
+          {tampered ? (
+            <>
+              <h2 className="amber-text">\u26A0\uFE0F Invalid table link</h2>
+              <p className="muted mt-2">
+                This link's table code couldn't be verified. To keep orders going to the
+                right table, we only accept the original QR code printed on your table.
+              </p>
+              <p className="muted mt-2">
+                Please scan the QR code on your own table again to start ordering.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="amber-text">Scan your table QR \uD83D\uDCF1</h2>
+              <p className="muted mt-2">
+                To place an order, scan the QR code on your table. It opens this page
+                with your verified table so your order reaches the right place.
+              </p>
+            </>
+          )}
+          <p className="muted mt-2" style={{ fontSize: 12 }}>
+            Staff: generate signed table links from the QR tool (see /qr-tool.html).
           </p>
-          <p className="muted mt-2" style={{ fontSize: 13 }}>
-            Tip for staff: each table's QR points to
-            <code style={{ color: 'var(--amber-bright)' }}> ?table=NUMBER</code>
-          </p>
-          <div className="mt-3 row gap" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-            {[1,2,3,4,5,6].map(n => (
-              <a key={n} className="btn btn-ghost" href={'?table=' + n}>Demo: Table {n}</a>
-            ))}
-          </div>
         </div>
       </div>
     </div>
